@@ -17,22 +17,21 @@
         #   curl https://prod.download.desktop.kiro.dev/stable/metadata-linux-x64-stable.json
         # ---------------------------------------------------------------
         version = "0.12.333";
-        # Önceki nix-prefetch-url çıktısından dönüştürülen SRI hash'i:
-        sha256  = "sha256-wsc5g1yq/nN3hD8K7wEExf9U6K3xL4YmRjF5A5hZ6vI=";
+        # Nix'in indirme sırasında doğruladığı gerçek SRI hash değeri:
+        sha256  = "sha256-EEj0hz3fxPtesifXuFb0DQfFHaYgOQ1wgkaqcNMeX84=";
 
         kiro-ide = pkgs.stdenv.mkDerivation {
           pname = "kiro-ide";
           inherit version;
 
           src = pkgs.fetchurl {
-            # Buradaki şablon URL, gerçek metadata URL'si ile değiştirildi:
             url = "https://prod.download.desktop.kiro.dev/releases/stable/linux-x64/signed/${version}/tar/kiro-ide-${version}-stable-linux-x64.tar.gz";
             inherit sha256;
           };
 
           nativeBuildInputs = [
             pkgs.autoPatchelfHook
-            pkgs.wrapGAppsHook3 # <-- nixpkgs-unstable uyumluluğu için wrapGAppsHook3 olarak güncellendi
+            pkgs.wrapGAppsHook3 # <-- nixpkgs-unstable uyumluluğu için güncel kanca
           ];
 
           # Electron/VSCode tabanlı IDE'nin runtime bağımlılıkları (glibc 2.39+)
@@ -65,6 +64,13 @@
             pango
             systemd
             xdg-utils
+
+            # ── auto-patchelf tarafından istenen bağımlılıklar ──
+            libxkbfile           # Microsoft-auth ve keymapping için güncel paket adı
+            webkitgtk_4_1        # Gömülü webview bileşenleri için
+            libsoup_3            # Ağ ve HTTP istekleri için
+            libsecret            # Güvenli kimlik doğrulama saklama (Keyring) için
+            libGL                # ANGLE/Display EGL grafik çökmelerini engellemek için GPU sürücü bağımlılığı
           ];
 
           dontBuild = true;
@@ -80,7 +86,6 @@
             mkdir -p $out/bin
             cat > $out/bin/kiro << 'EOF'
 #!/bin/sh
-# $out/bin içinde exec çağrısı yaparken $out dinamik kalsın diye kaçış (escape) karakteri düzeltildi
 exec "@out@/lib/kiro-ide/kiro" "$@"
 EOF
             substituteInPlace $out/bin/kiro --subst-var out
