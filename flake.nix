@@ -32,7 +32,7 @@
 
           nativeBuildInputs = [
             pkgs.autoPatchelfHook
-            pkgs.wrapGAppsHook
+            pkgs.wrapGAppsHook3 # <-- nixpkgs-unstable uyumluluğu için wrapGAppsHook3 olarak güncellendi
           ];
 
           # Electron/VSCode tabanlı IDE'nin runtime bağımlılıkları (glibc 2.39+)
@@ -125,7 +125,7 @@ EOF
 
         apps.default = {
           type = "app";
-                  program = "${kiro-ide}/bin/kiro";
+          program = "${kiro-ide}/bin/kiro";
         };
       }
     );
